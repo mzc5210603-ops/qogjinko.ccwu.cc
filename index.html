@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>暗房 · 图像工坊</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="lamp-head">
+  <div class="safe-light"></div>
+  <div class="plate">
+    <h1>暗房<span>DARKROOM&nbsp;No.25</span></h1>
+    <p class="plate-sub">图像工坊　·　本地显影　·　零上传</p>
+  </div>
+</header>
+
+<nav class="filmstrip">
+  <div class="perf"></div>
+  <ul id="stripTabs">
+    <li class="on" data-t="resize"><i>01</i>尺寸</li>
+    <li data-t="format"><i>02</i>格式</li>
+    <li data-t="filter"><i>03</i>滤镜</li>
+    <li data-t="picker"><i>04</i>取色</li>
+    <li data-t="b64"><i>05</i>Base64</li>
+  </ul>
+  <div class="perf"></div>
+</nav>
+
+<main>
+
+  <section class="view" id="v-resize">
+    <h2>底片缩放</h2>
+    <div class="dropzone" id="rzDrop">点选或拖入图片 —— 此处显影</div>
+    <input type="file" id="rzFile" accept="image/*" hidden>
+    <div class="dev-tray"><canvas id="rzCanvas"></canvas></div>
+    <div class="ctl">
+      <div class="row"><span class="lab">缩放</span>
+        <input type="range" id="rzPct" min="10" max="200" value="100" style="flex:1">
+        <b id="rzPctV" class="mono">100%</b></div>
+      <div class="row"><span class="lab">宽</span><input type="number" id="rzW" style="width:110px">
+        <span class="lab" style="min-width:auto">高</span><input type="number" id="rzH" style="width:110px">
+        <label><input type="checkbox" id="rzLock" checked> 锁比例</label></div>
+      <div class="row"><button class="btn" id="rzApply">显影输出</button>
+        <button class="btn dark" id="rzSave">保存 PNG</button>
+        <span class="mono" id="rzInfo"></span></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-format" hidden>
+    <h2>格式与压缩</h2>
+    <div class="dropzone" id="fmDrop">点选或拖入图片 —— 此处显影</div>
+    <input type="file" id="fmFile" accept="image/*" hidden>
+    <div class="dev-tray"><canvas id="fmCanvas"></canvas></div>
+    <div class="ctl">
+      <div class="row"><span class="lab">输出</span>
+        <select id="fmType"><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select>
+        <span class="lab" style="min-width:auto">质量</span>
+        <input type="range" id="fmQ" min="10" max="100" value="80" style="flex:1">
+        <b id="fmQV" class="mono">80</b></div>
+      <div class="row"><button class="btn" id="fmGo">转制底片</button>
+        <button class="btn dark" id="fmSave">保存结果</button>
+        <span class="mono" id="fmInfo"></span></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-filter" hidden>
+    <h2>药水调色</h2>
+    <div class="dropzone" id="ftDrop">点选或拖入图片 —— 此处显影</div>
+    <input type="file" id="ftFile" accept="image/*" hidden>
+    <div class="dev-tray"><canvas id="ftCanvas"></canvas></div>
+    <div class="ctl">
+      <div class="row"><span class="lab">药水</span>
+        <select id="ftPreset">
+          <option value="">原片</option>
+          <option value="grayscale(1)">黑白</option>
+          <option value="invert(1)">负片</option>
+          <option value="sepia(1)">旧照</option>
+          <option value="saturate(1.8) hue-rotate(-12deg)">艳丽</option>
+          <option value="saturate(.6) contrast(1.15) brightness(1.05)">褪色</option>
+          <option value="contrast(1.4) brightness(.92)">硬调</option>
+        </select>
+        <span class="lab" style="min-width:auto">亮度</span>
+        <input type="range" id="ftB" min="50" max="150" value="100" style="flex:1">
+        <span class="lab" style="min-width:auto">对比</span>
+        <input type="range" id="ftC" min="50" max="160" value="100" style="flex:1"></div>
+      <div class="row"><button class="btn" id="ftSave">保存成片</button>
+        <span class="mono" id="ftInfo"></span></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-picker" hidden>
+    <h2>吸管取色</h2>
+    <div class="dropzone" id="pkDrop">点选或拖入图片 —— 点击画布取色</div>
+    <input type="file" id="pkFile" accept="image/*" hidden>
+    <div class="dev-tray"><canvas id="pkCanvas"></canvas></div>
+    <div class="ctl">
+      <div class="pick-now">
+        <div class="pick-sw" id="pkSw"></div>
+        <div class="mono" id="pkVal">点击画布任意位置</div>
+      </div>
+      <div class="row"><span class="lab">色板</span>
+        <button class="btn ghost" id="pkAdd">收入色板</button>
+        <button class="btn warn" id="pkClear">清空</button></div>
+      <ul class="palette" id="pkList"></ul>
+    </div>
+  </section>
+
+  <section class="view" id="v-b64" hidden>
+    <h2>Base64 底片</h2>
+    <div class="ctl grid2">
+      <div>
+        <p class="lab">图片 → Base64</p>
+        <div class="dropzone small" id="b6Drop">点选图片</div>
+        <input type="file" id="b6File" accept="image/*" hidden>
+        <textarea id="b6Out" readonly placeholder="dataURL 将显影于此"></textarea>
+        <div class="row"><button class="btn ghost" id="b6Copy">复制全文</button>
+          <span class="mono" id="b6Info"></span></div>
+      </div>
+      <div>
+        <p class="lab">Base64 → 图片</p>
+        <textarea id="b6In" placeholder="粘贴 data:image/... 基址串"></textarea>
+        <div class="row"><button class="btn" id="b6Show">显影预览</button></div>
+        <div class="dev-tray small"><img id="b6Img" alt="预览"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rail">
+  <span class="lamp-dot"></span>
+  <span id="stMsg">暗房待片</span>
+  <span class="st-dots"></span>
+  <span id="stClock" class="mono"></span>
+</footer>
+
+<div id="errSink" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
